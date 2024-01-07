@@ -1,25 +1,23 @@
-import { useState } from "react";
+import { signal } from "@preact/signals-react";
 import "./App.css";
-import { useAppDispatch, useAppSelector } from "./app/hooks";
-import { RootState } from "./app/store";
 import logo from "./assets/react.svg";
-import { amountAdded } from "./features/counter/counter-slice";
-import { useFetchBreedsQuery } from "./features/dogs/dogs-api-slice";
+import { appCount } from "./contexts/count.context";
+import { appDogsData } from "./contexts/dogs.context";
+
+const numDogs = signal(5);
+appDogsData.useFetchBreedsQuery(numDogs);
 
 function App() {
-  const count = useAppSelector((state: RootState) => state.counter.value);
-  const dispatch = useAppDispatch();
-
-  const [numDogs, setNumDogs] = useState(10);
-  const { data = [] } = useFetchBreedsQuery(numDogs);
-
   function handleClick() {
-    // increment by 1
-    // dispatch(incremented());
-
-    // increment by a fixed amount
-    dispatch(amountAdded(3));
+    appCount.amountAdded(3);
+    // appCount.increment();
   }
+
+  // console.log({
+  //   appCount,
+  //   numDogs,
+  //   appDogsData,
+  // });
 
   return (
     <div className="App">
@@ -27,14 +25,14 @@ function App() {
         <img src={logo} className="App-logo" alt="logo" />
         <p>Hello Vite + React!</p>
         <p>
-          <button onClick={handleClick}>count is: {count}</button>
+          <button onClick={handleClick}>count is: {appCount.value} </button>
         </p>
 
         <div>
           <p>Dogs to fetch:</p>
           <select
-            value={numDogs}
-            onChange={(e) => setNumDogs(Number(e.target.value))}
+            value={numDogs.value}
+            onChange={(e) => (numDogs.value = Number(e.target.value))}
           >
             <option value="5">5</option>
             <option value="10">10</option>
@@ -44,7 +42,7 @@ function App() {
         </div>
 
         <div>
-          <p>Number of dogs fetched: {data.length}</p>
+          <p>Number of dogs fetched: {appDogsData.value.length}</p>
           <table>
             <thead>
               <tr>
@@ -53,7 +51,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {data.map((breed) => (
+              {appDogsData.value.map((breed) => (
                 <tr key={breed.id}>
                   <td>{breed.name}</td>
                   <td>
